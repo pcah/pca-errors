@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+__pypackages__/
+*.py[cod]
+*$py.class
+.cache
+.pytest_cache
+
+# build & test
+build/
+dist/
+.eggs/
+*.egg-info
+.tox
+.coverage
+coverage.xml
+
+# IDEs
+*.swp
+*~
+.idea
+.vscode
+*.bat
+
+# DB
+*.db
+*.db-journal

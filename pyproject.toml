@@ -1,0 +1,118 @@
+[tool.poetry]
+name = "pca-errors"
+version = "0.0.1"
+description = "Declarative, parametrizable & l10n-independent errors for python-clean-architecture."
+authors = [
+    "lhaze <github@lhaze.name>",
+]
+license = "MIT License"
+readme = "README.md"
+homepage = "https://github.com/pcah/pca-errors"
+repository = "https://github.com/pcah/pca-errors"
+
+keywords = [
+    "python",
+    "error-handling",
+    "design-patterns"
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Intended Audience :: Developers",
+    "Development Status :: 3 - Alpha",
+]
+packages = [
+    { include = "pca" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+
+[tool.poetry.dev-dependencies]
+
+black = {version = "^20.8b1", markers = "platform_python_implementation!='PyPy'"}
+coverage = "^5.3"
+flake8 = "^3.8.4"
+ipython = [
+    {version = "^7.19.0", python = "^3.7"},
+    {version = "~7.16.0", python = "3.6"},
+]
+isort = "^5.6.4"
+mock = "^4.0.2"
+pdbpp = "^0.10.2"
+pre-commit = "^2.9.2"
+pytest = "^6.1.2"
+pytest-cov = "^2.10.1"
+pytest-mock = "^3.3.1"
+tox = "^3.24.1"
+tox-poetry-installer = "^0.8.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 99
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+force_grid_wrap = 2
+atomic = true
+include_trailing_comma = true
+lines_after_imports = 2
+lines_between_types = 1
+use_parentheses = true
+src_paths = [
+    "pca/errors",
+    "tests",
+]
+skip_glob = ["*/setup.py"]
+filter_files = true
+known_first_party = ["pca"]
+
+[tool.pytest.ini_options]
+addopts = "--cov-fail-under=90 --tb=short"
+
+[tool.coverage.run]
+source = ["pca"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+    # Don't complain if non-runnable code isn't run:
+    "if __name__ == .__main__.:",
+]
