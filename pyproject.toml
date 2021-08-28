@@ -99,8 +99,10 @@ known_first_party = ["pca"]
 addopts = "--cov-fail-under=90 --tb=short"
 
 [tool.coverage.run]
-source = ["pca"]
-omit = ["tests/*"]
+source = ["pca.errors"]
+omit = [
+    "tests/*"
+]
 
 [tool.coverage.report]
 show_missing = true

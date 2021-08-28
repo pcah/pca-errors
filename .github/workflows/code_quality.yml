@@ -41,7 +41,7 @@ jobs:
 
       - name: Run pre-commit for auxiliary linters
         run: |
-          apt-install tree -y
+          apt install -y tree
           tree
           poetry run pre-commit run -a -c .pre-commit-config-ci.yaml
 
