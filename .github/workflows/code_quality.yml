@@ -31,6 +31,8 @@ jobs:
   lint-other:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
@@ -40,10 +42,7 @@ jobs:
         run: python -m pip install --upgrade pip poetry pre-commit~=2.9.2 setuptools
 
       - name: Run pre-commit for auxiliary linters
-        run: |
-          apt install -y tree
-          tree
-          poetry run pre-commit run -a -c .pre-commit-config-ci.yaml
+        run: poetry run pre-commit run -a -c .pre-commit-config-ci.yaml
 
   test:
     runs-on: ${{ matrix.platform }}
@@ -72,8 +71,8 @@ jobs:
     - name: Test with tox
       run: tox
 
-    - name: Upload coverage
-      uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: true
+    # - name: Upload coverage
+    #   uses: codecov/codecov-action@v1
+    #   with:
+    #     file: ./coverage.xml
+    #     fail_ci_if_error: true
