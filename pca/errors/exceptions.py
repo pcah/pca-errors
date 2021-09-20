@@ -4,7 +4,7 @@ import typing as t
 from copy import deepcopy
 
 
-if t.TYPE_CHECKING:
+if t.TYPE_CHECKING:  # pragma: no cover
     from .catalog import ErrorCatalog
 
 
