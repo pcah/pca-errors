@@ -1,6 +1,9 @@
 import typing as t
 
-from pca.errors.types import ExceptionWithCode
+from pca.errors.types import (
+    ExceptionWithCode,
+    is_error_class,
+)
 
 
 def _get_cls(error: ExceptionWithCode) -> t.Type[Exception]:
@@ -41,7 +44,11 @@ def _clone(error: ExceptionWithCode, **kwargs) -> ExceptionWithCode:
     return error.__class__(*error.args, **new_kwargs)
 
 
-class ErrorBuilder(type):
+def _is_conforming(error: ExceptionWithCode, error_class: t.Type):
+    return isinstance(error, error_class)
+
+
+class error_builder(type):
     """
     Error class constructed with some assumptions:
     * human-readable description of the error should be computed as late as possible (not earlier
@@ -64,7 +71,7 @@ class ErrorBuilder(type):
         bases: t.Union[t.Type[Exception], t.Sequence[t.Type[Exception]]] = Exception,
         hint: str = "",
     ):
-        if isinstance(bases, type) and issubclass(bases, Exception):
+        if is_error_class(bases):
             bases = (bases,)
         namespace = {
             "code": name,
@@ -77,6 +84,7 @@ class ErrorBuilder(type):
             "__repr__": _repr,
             "to_dict": _to_dict,
             "clone": _clone,
+            "is_conforming": _is_conforming,
         }
         return super().__new__(mcs, name, bases, namespace)
 
@@ -84,6 +92,7 @@ class ErrorBuilder(type):
         pass
 
     def __repr__(cls) -> str:
+
         catalog_str = f" catalog={str(cls.catalog)}" if cls.catalog else ""
         return f"<{cls.code}{catalog_str}>"
 

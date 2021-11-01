@@ -2,17 +2,18 @@ import typing as t
 
 from collections import OrderedDict
 
-from .builder import ErrorBuilder
+from .builder import ExceptionWithCode
+from .types import is_error_class
 
 
 class ErrorCatalogMeta(type):
 
-    _registry: t.Dict[str, ErrorBuilder]
+    _registry: t.Dict[str, ExceptionWithCode]
 
     def __init__(cls, *args, **kwargs):
         super().__init__(*args, **kwargs)
         cls._registry = OrderedDict(
-            (v.code, v) for k, v in cls.__dict__.items() if isinstance(v, ErrorBuilder)
+            (v.code, v) for _, v in cls.__dict__.items() if is_error_class(v)
         )
 
     def __str__(cls) -> str:
@@ -21,23 +22,23 @@ class ErrorCatalogMeta(type):
     def __repr__(cls) -> str:
         return f"{cls.__module__}.{cls.__qualname__}"
 
-    def __iter__(cls) -> ErrorBuilder:
+    def __iter__(cls) -> ExceptionWithCode:
         """Iterate over registered errors."""
         yield from cls._registry.values()
 
     def __len__(cls) -> int:
         return len(cls._registry)
 
-    def __contains__(cls, item: ErrorBuilder) -> bool:
+    def __contains__(cls, item: ExceptionWithCode) -> bool:
         return item in cls._registry.values()
 
-    def add_instance(cls, error: ErrorBuilder) -> None:
-        """Registers an instance of an BaseError as an element of the ErrorCatalog."""
-        cls._registry[error.code] = error
-        setattr(cls, error.code, error)
-        error.__dict__["catalog"] = cls
+    def add_instance(cls, error_class: t.Type[ExceptionWithCode]) -> None:
+        """Registers an ExceptionWithCode subtype as an element of the ErrorCatalog."""
+        cls._registry[error_class.code] = error_class
+        setattr(cls, error_class.code, error_class)
+        error_class.catalog = cls
 
-    def all(cls) -> t.Tuple[ErrorBuilder]:
+    def all(cls) -> t.Tuple[ExceptionWithCode]:
         return tuple(cls._registry.values())
 
 

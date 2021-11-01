@@ -1,15 +1,15 @@
 import pytest
 
 from pca.errors import (
-    ErrorBuilder,
     ErrorCatalog,
     ExceptionWithCode,
+    error_builder,
 )
 
 
 @pytest.fixture
 def error_class():
-    return ErrorBuilder("MyError")
+    return error_builder("MyError")
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def catalog():
 
 class TestErrorBuilder:
     def test_repr_on_class(self):
-        assert repr(ErrorBuilder("MyError", hint="hint")) == "<MyError>"
+        assert repr(error_builder("MyError", hint="hint")) == "<MyError>"
 
     def test_repr_on_instance(self, error_class):
         assert repr(error_class()) == "MyError()"
@@ -62,7 +62,7 @@ class TestErrorBuilder:
 
     def test_class_with_hint(self):
         hint = "Some hint for fellow developers."
-        error_class = ErrorBuilder(
+        error_class = error_builder(
             "MyError",
             hint=hint,
         )
@@ -72,6 +72,15 @@ class TestErrorBuilder:
 
     def test_conforms(self, error_class, error_instance):
         assert error_class.conforms(error_instance)
+        assert error_instance.is_conforming(error_class)
+        assert not error_instance.is_conforming(ValueError)
+
+    def test_conforms_base_class(self):
+        error_class = error_builder("SomeError", bases=ValueError)
+        error_instance = error_class(foo="bar")
+        assert error_class.conforms(error_instance)
+        assert error_instance.is_conforming(error_class)
+        assert error_instance.is_conforming(ValueError)
 
     def test_clone(self, error_class, error_instance_with_kwargs):
         cloned = error_instance_with_kwargs.clone(foo="spam", bar="eggs")
@@ -88,7 +97,7 @@ class TestErrorCatching:
         class MyBaseClass(Exception):
             pass
 
-        error_class = ErrorBuilder("MyError", bases=MyBaseClass)
+        error_class = error_builder("MyError", bases=MyBaseClass)
         with pytest.raises(error_class) as error_info:
             raise error_class
         assert error_info.value.cls == error_class
@@ -97,7 +106,7 @@ class TestErrorCatching:
         class MyBaseClass(Exception):
             pass
 
-        error_class = ErrorBuilder("MyError", bases=(MyBaseClass, ValueError))
+        error_class = error_builder("MyError", bases=(MyBaseClass, ValueError))
         with pytest.raises(ValueError) as error_info:
             raise error_class
         assert isinstance(error_info.value, error_class)
@@ -115,7 +124,7 @@ class TestErrorCatching:
 class TestIntegrationWithCatalog:
     def test_setting_catalog(self):
         class MyCatalog(ErrorCatalog):
-            SomeName = ErrorBuilder("OtherName", hint="hint")
+            SomeName = error_builder("OtherName", hint="hint")
 
         assert MyCatalog.SomeName.catalog is MyCatalog
         assert repr(MyCatalog.SomeName) == "<OtherName catalog=MyCatalog>"
@@ -123,14 +132,14 @@ class TestIntegrationWithCatalog:
     # noinspection PyUnusedLocal
     def test_not_setting_catalog(self, error_class: ExceptionWithCode):
         class NotACatalog:
-            SomeName = ErrorBuilder("OtherName", hint="hint")
+            SomeName = error_builder("OtherName", hint="hint")
 
         assert error_class.catalog is None
         assert repr(NotACatalog.SomeName) == "<OtherName>"
 
     def test_catalog_sets_name(self):
         class MyCatalog(ErrorCatalog):
-            SomeName = ErrorBuilder(hint="hint")
+            SomeName = error_builder(hint="hint")
 
         assert repr(MyCatalog.SomeName) == "<SomeName catalog=MyCatalog>"
         assert MyCatalog.SomeName.__name__ == "SomeName"

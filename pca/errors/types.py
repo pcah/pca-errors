@@ -20,3 +20,7 @@ class ExceptionWithCode(Exception):
 
     def clone(self) -> "ExceptionWithCode":
         "Duplicates the `self` instance, updating its `kwargs` iff such update is defined."
+
+
+def is_error_class(sth: t.Any) -> bool:
+    return isinstance(sth, type) and issubclass(sth, Exception)
