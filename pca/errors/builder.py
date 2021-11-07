@@ -44,7 +44,7 @@ def _clone(error: ExceptionWithCode, **kwargs) -> ExceptionWithCode:
     return error.__class__(*error.args, **new_kwargs)
 
 
-def _is_conforming(error: ExceptionWithCode, error_class: t.Type):
+def _is_conforming(error: ExceptionWithCode, error_class: t.Type[Exception]) -> bool:
     return isinstance(error, error_class)
 
 
