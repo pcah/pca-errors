@@ -1,12 +1,20 @@
 import typing as t
 
 from pca.errors.types import (
+    ExceptionTypeOrTypes,
     ExceptionWithCode,
+    ExceptionWithCodeType,
     is_error_class,
 )
 
 
-def _get_cls(error: ExceptionWithCode) -> t.Type[Exception]:
+__all__ = (
+    "error_builder",
+    "ErrorMeta",
+)
+
+
+def _get_cls(error: ExceptionWithCode) -> t.Type[ExceptionWithCodeType]:
     return error.__class__
 
 
@@ -48,7 +56,15 @@ def _is_conforming(error: ExceptionWithCode, error_class: t.Type[Exception]) -> 
     return isinstance(error, error_class)
 
 
-class error_builder(type):
+def error_builder(
+    name: str = "",
+    base: ExceptionTypeOrTypes = Exception,
+    hint: str = "",
+) -> ExceptionWithCodeType:
+    return ErrorMeta(name=name, base=base, hint=hint)  # type: ignore
+
+
+class ErrorMeta(type):
     """
     Error class constructed with some assumptions:
     * human-readable description of the error should be computed as late as possible (not earlier
@@ -66,13 +82,13 @@ class error_builder(type):
     """
 
     def __new__(
-        mcs,
+        cls,
         name: str = "",
-        bases: t.Union[t.Type[Exception], t.Sequence[t.Type[Exception]]] = Exception,
+        base: ExceptionTypeOrTypes = ExceptionWithCode,
         hint: str = "",
-    ):
-        if is_error_class(bases):
-            bases = (bases,)
+    ) -> ExceptionWithCodeType:
+        if is_error_class(base):
+            base = (base,)  # type: ignore
         namespace = {
             "code": name,
             "cls": property(_get_cls),
@@ -86,19 +102,18 @@ class error_builder(type):
             "clone": _clone,
             "is_conforming": _is_conforming,
         }
-        return super().__new__(mcs, name, bases, namespace)
+        return super().__new__(cls, name, base, namespace)  # type: ignore
 
-    def __init__(cls, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         pass
 
-    def __repr__(cls) -> str:
+    def __repr__(self) -> str:
+        catalog_str = f"{self.catalog.name}." if self.catalog else ""
+        return f"{catalog_str}{self.code}"
 
-        catalog_str = f" catalog={str(cls.catalog)}" if cls.catalog else ""
-        return f"<{cls.code}{catalog_str}>"
+    __str__ = __repr__  # type: ignore
 
-    __str__ = __repr__
-
-    def __set_name__(cls, owner: t.Any, name: str) -> None:
+    def __set_name__(self, owner: t.Any, name: str) -> None:
         """
         Setting an instance on an ErrorCatalog subclass as a filed closely bounds both
         and can set value to its name.
@@ -107,9 +122,9 @@ class error_builder(type):
 
         if not issubclass(owner, ErrorCatalog):
             return
-        cls.catalog = owner
-        name = cls.code or name
-        cls.code = cls.__name__ = name
+        self.catalog = owner
+        name = self.code or name
+        self.code = self.__name__ = name
 
-    def conforms(cls, error: Exception) -> bool:
-        return isinstance(error, cls)
+    def conforms(self, error: Exception) -> bool:
+        return isinstance(error, self)

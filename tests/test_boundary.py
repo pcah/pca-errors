@@ -76,7 +76,7 @@ class TestCatching:
         exception = AnException()
         with catchall_boundary as error_boundary:
             raise exception
-        assert error_boundary.exc_info.value is exception
+        assert error_boundary.exc_info.value is exception  # type: ignore
 
     def test_catchall_as_decorator(self, catchall_boundary):
         exception = AnException()
@@ -86,7 +86,7 @@ class TestCatching:
             raise exception
 
         foo()
-        assert catchall_boundary.exc_info.value is exception
+        assert catchall_boundary.exc_info.value is exception  # type: ignore
 
     def test_specific_catching(self, specific_boundary):
         exception = AnException()
@@ -98,6 +98,7 @@ class TestCatching:
         exception = AnException()
         with boundary_with_callbacks:
             raise exception
+        # type: ignore
         callbacks.log_inner_error.assert_not_called()
         callbacks.should_propagate_exception.assert_called_once_with(
             boundary_with_callbacks.exc_info
@@ -114,7 +115,7 @@ class TestPropagating:
         with pytest.raises(AnotherException) as error_info:
             with specific_boundary:
                 raise exception
-        assert error_info.value is exception
+        assert error_info.value is exception  # type: ignore
 
     def test_callbacks(self, boundary_with_callbacks, callbacks):
         exception = AnException()

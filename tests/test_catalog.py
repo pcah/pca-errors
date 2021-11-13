@@ -1,3 +1,5 @@
+import typing as t
+
 from pca.errors import (
     ErrorCatalog,
     ExceptionWithCode,
@@ -6,8 +8,8 @@ from pca.errors import (
 
 
 class ExampleCatalog(ErrorCatalog):
-    Foo: ExceptionWithCode = error_builder()
-    Bar: ExceptionWithCode = error_builder("MyBar")
+    Foo: t.Type[ExceptionWithCode] = error_builder()
+    Bar: t.Type[ExceptionWithCode] = error_builder("MyBar")
 
 
 class TestErrorCatalog:
@@ -33,4 +35,4 @@ class TestErrorCatalog:
         instance = error_builder("Baz")
         ExampleCatalog.add_instance(instance)
         assert instance in ExampleCatalog
-        assert ExampleCatalog.Baz is instance
+        assert ExampleCatalog.Baz is instance  # type: ignore

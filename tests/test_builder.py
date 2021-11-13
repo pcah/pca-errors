@@ -5,6 +5,7 @@ from pca.errors import (
     ExceptionWithCode,
     error_builder,
 )
+from pca.errors.types import ExceptionWithCodeType
 
 
 @pytest.fixture
@@ -29,7 +30,7 @@ def catalog():
 
 class TestErrorBuilder:
     def test_repr_on_class(self):
-        assert repr(error_builder("MyError", hint="hint")) == "<MyError>"
+        assert repr(error_builder("MyError", hint="hint")) == "MyError"
 
     def test_repr_on_instance(self, error_class):
         assert repr(error_class()) == "MyError()"
@@ -49,7 +50,7 @@ class TestErrorBuilder:
         assert error_instance_with_kwargs.hint == ""
 
     def test_error_kwargs(self, error_instance_with_kwargs: ExceptionWithCode):
-        error_instance_with_kwargs.foo = "bar"
+        assert error_instance_with_kwargs.foo == "bar"
 
         with pytest.raises(AttributeError):
             error_instance_with_kwargs.bar
@@ -62,7 +63,7 @@ class TestErrorBuilder:
 
     def test_class_with_hint(self):
         hint = "Some hint for fellow developers."
-        error_class = error_builder(
+        error_class: ExceptionWithCodeType = error_builder(
             "MyError",
             hint=hint,
         )
@@ -76,7 +77,7 @@ class TestErrorBuilder:
         assert not error_instance.is_conforming(ValueError)
 
     def test_conforms_base_class(self):
-        error_class = error_builder("SomeError", bases=ValueError)
+        error_class = error_builder("SomeError", base=ValueError)
         error_instance = error_class(foo="bar")
         assert error_class.conforms(error_instance)
         assert error_instance.is_conforming(error_class)
@@ -97,19 +98,19 @@ class TestErrorCatching:
         class MyBaseClass(Exception):
             pass
 
-        error_class = error_builder("MyError", bases=MyBaseClass)
+        error_class = error_builder("MyError", base=MyBaseClass)
         with pytest.raises(error_class) as error_info:
             raise error_class
-        assert error_info.value.cls == error_class
+        assert error_info.value.cls == error_class  # type: ignore
 
     def test_multi_inheritance(self):
         class MyBaseClass(Exception):
             pass
 
-        error_class = error_builder("MyError", bases=(MyBaseClass, ValueError))
+        error_class = error_builder("MyError", base=(MyBaseClass, ValueError))
         with pytest.raises(ValueError) as error_info:
             raise error_class
-        assert isinstance(error_info.value, error_class)
+        assert isinstance(error_info.value, error_class)  # type: ignore
         assert isinstance(error_info.value, ValueError)
 
     def test_instance_with_kwargs_raised(self, error_class):
@@ -127,7 +128,7 @@ class TestIntegrationWithCatalog:
             SomeName = error_builder("OtherName", hint="hint")
 
         assert MyCatalog.SomeName.catalog is MyCatalog
-        assert repr(MyCatalog.SomeName) == "<OtherName catalog=MyCatalog>"
+        assert repr(MyCatalog.SomeName) == "MyCatalog.OtherName"
 
     # noinspection PyUnusedLocal
     def test_not_setting_catalog(self, error_class: ExceptionWithCode):
@@ -135,11 +136,11 @@ class TestIntegrationWithCatalog:
             SomeName = error_builder("OtherName", hint="hint")
 
         assert error_class.catalog is None
-        assert repr(NotACatalog.SomeName) == "<OtherName>"
+        assert repr(NotACatalog.SomeName) == "OtherName"
 
     def test_catalog_sets_name(self):
         class MyCatalog(ErrorCatalog):
             SomeName = error_builder(hint="hint")
 
-        assert repr(MyCatalog.SomeName) == "<SomeName catalog=MyCatalog>"
+        assert repr(MyCatalog.SomeName) == "MyCatalog.SomeName"
         assert MyCatalog.SomeName.__name__ == "SomeName"

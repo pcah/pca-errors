@@ -2,44 +2,50 @@ import typing as t
 
 from collections import OrderedDict
 
-from .builder import ExceptionWithCode
-from .types import is_error_class
+from .types import (
+    ExceptionWithCodeType,
+    is_error_class,
+)
 
 
 class ErrorCatalogMeta(type):
 
-    _registry: t.Dict[str, ExceptionWithCode]
+    _registry: t.Dict[str, ExceptionWithCodeType]
 
-    def __init__(cls, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        cls._registry = OrderedDict(
-            (v.code, v) for _, v in cls.__dict__.items() if is_error_class(v)
+        self._registry = OrderedDict(
+            (v.code, v) for _, v in self.__dict__.items() if is_error_class(v)
         )
 
-    def __str__(cls) -> str:
-        return f"{cls.__name__}"
+    @property
+    def name(self) -> str:
+        return self.__name__
 
-    def __repr__(cls) -> str:
-        return f"{cls.__module__}.{cls.__qualname__}"
+    def __str__(self) -> str:
+        return f"{self.__name__}"
 
-    def __iter__(cls) -> ExceptionWithCode:
+    def __repr__(self) -> str:
+        return f"{self.__module__}.{self.__qualname__}"
+
+    def __iter__(self) -> t.Iterator[ExceptionWithCodeType]:
         """Iterate over registered errors."""
-        yield from cls._registry.values()
+        yield from self._registry.values()
 
-    def __len__(cls) -> int:
-        return len(cls._registry)
+    def __len__(self) -> int:
+        return len(self._registry)
 
-    def __contains__(cls, item: ExceptionWithCode) -> bool:
-        return item in cls._registry.values()
+    def __contains__(self, item: ExceptionWithCodeType) -> bool:
+        return item in self._registry.values()
 
-    def add_instance(cls, error_class: t.Type[ExceptionWithCode]) -> None:
+    def add_instance(self, error_class: ExceptionWithCodeType) -> None:
         """Registers an ExceptionWithCode subtype as an element of the ErrorCatalog."""
-        cls._registry[error_class.code] = error_class
-        setattr(cls, error_class.code, error_class)
-        error_class.catalog = cls
+        self._registry[error_class.code] = error_class
+        setattr(self, error_class.code, error_class)
+        error_class.catalog = t.cast("ErrorCatalog", self)
 
-    def all(cls) -> t.Tuple[ExceptionWithCode]:
-        return tuple(cls._registry.values())
+    def all(self) -> t.Tuple[ExceptionWithCodeType, ...]:
+        return tuple(self._registry.values())
 
 
 class ErrorCatalog(metaclass=ErrorCatalogMeta):

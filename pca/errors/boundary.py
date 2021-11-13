@@ -9,16 +9,16 @@ from .types import (
 )
 
 
-Function = t.TypeVar("Function")
+__all__ = ("ErrorBoundary",)
 
 
 class ErrorBoundary:
 
-    exc_info: ExceptionInfo = None
+    exc_info: t.Optional[ExceptionInfo] = None
 
     def __init__(
         self,
-        catch: t.Optional[ExceptionTypeOrTypes] = Exception,
+        catch: ExceptionTypeOrTypes = Exception,
         log_inner_error: t.Callable[["ErrorBoundary", Exception], None] = None,
         should_propagate_exception: t.Callable[["ErrorBoundary", ExceptionInfo], bool] = None,
         transform_propagated_exception: t.Callable[
@@ -42,19 +42,19 @@ class ErrorBoundary:
         # for all the callbacks, if defined, override appropriate methods instance-wide without
         # inheritance
         if log_inner_error:
-            self.log_inner_error = log_inner_error
+            self.log_inner_error = log_inner_error  # type: ignore
         if should_propagate_exception:
-            self.should_propagate_exception = should_propagate_exception
+            self.should_propagate_exception = should_propagate_exception  # type: ignore
         if transform_propagated_exception:
-            self.transform_propagated_exception = transform_propagated_exception
+            self.transform_propagated_exception = transform_propagated_exception  # type: ignore
         if on_no_exception:
-            self.on_no_exception = on_no_exception
+            self.on_no_exception = on_no_exception  # type: ignore
         if on_propagate_exception:
-            self.on_propagate_exception = on_propagate_exception
+            self.on_propagate_exception = on_propagate_exception  # type: ignore
         if on_suppress_exception:
-            self.on_suppress_exception = on_suppress_exception
+            self.on_suppress_exception = on_suppress_exception  # type: ignore
 
-    def __call__(self, func: Function) -> Function:
+    def __call__(self, func: t.Callable) -> t.Callable:
         @wraps(func)
         def inner(*args, **kwargs):
             with self:
@@ -131,7 +131,7 @@ class ErrorBoundary:
 
         Silences all catched errors by default.
         """
-        return not isinstance(exc_info.value, self.catch)
+        return not self.catch or not isinstance(exc_info.value, self.catch)
 
     def transform_propagated_exception(self, exc_info: ExceptionInfo) -> t.Optional[Exception]:
         """
@@ -163,4 +163,4 @@ class ErrorBoundary:
         By default it logs the error using default logger on WARNING level.
         """
         inner_logger = logging.getLogger(__name__)
-        inner_logger.warning(repr(exc_info.value), exc_info=1)
+        inner_logger.warning(repr(exc_info.value), exc_info=True)
