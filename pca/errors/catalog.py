@@ -18,12 +18,8 @@ class ErrorCatalogMeta(type):
             (v.code, v) for _, v in self.__dict__.items() if is_error_class(v)
         )
 
-    @property
-    def name(self) -> str:
-        return self.__name__
-
     def __str__(self) -> str:
-        return f"{self.__name__}"
+        return self.__name__
 
     def __repr__(self) -> str:
         return f"{self.__module__}.{self.__qualname__}"

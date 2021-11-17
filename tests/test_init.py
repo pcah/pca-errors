@@ -3,5 +3,6 @@ def test_pca_namespace():
 
     assert hasattr(errors, "ErrorBoundary")
     assert hasattr(errors, "error_builder")
+    assert hasattr(errors, "ErrorMeta")
     assert hasattr(errors, "ErrorCatalog")
     assert hasattr(errors, "ExceptionWithCode")

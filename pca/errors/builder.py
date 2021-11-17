@@ -108,7 +108,7 @@ class ErrorMeta(type):
         pass
 
     def __repr__(self) -> str:
-        catalog_str = f"{self.catalog.name}." if self.catalog else ""
+        catalog_str = f"{str(self.catalog)}." if self.catalog else ""
         return f"{catalog_str}{self.code}"
 
     __str__ = __repr__  # type: ignore
