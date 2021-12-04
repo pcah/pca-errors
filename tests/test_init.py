@@ -1,5 +1,5 @@
 def test_pca_namespace():
-    from pca import errors
+    from pca.packages import errors
 
     assert hasattr(errors, "ErrorBoundary")
     assert hasattr(errors, "error_builder")

@@ -90,7 +90,7 @@ lines_after_imports = 2
 lines_between_types = 1
 use_parentheses = true
 src_paths = [
-    "pca/errors",
+    "pca/packages/errors",
     "tests",
 ]
 skip_glob = ["*/setup.py"]
@@ -99,15 +99,15 @@ known_first_party = ["pca"]
 
 [tool.pyright]
 include = [
-    "pca/errors/",
+    "pca/packages/errors/",
     "tests",
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov-fail-under=90 --tb=short"
+addopts = "--cov-fail-under=100 --tb=short"
 
 [tool.coverage.run]
-source = ["pca.errors"]
+source = ["pca.packages.errors"]
 omit = [
     "tests/*"
 ]

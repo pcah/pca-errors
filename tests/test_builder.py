@@ -1,11 +1,11 @@
 import pytest
 
-from pca.errors import (
+from pca.packages.errors import (
     ErrorCatalog,
     ExceptionWithCode,
     error_builder,
 )
-from pca.errors.types import ExceptionWithCodeType
+from pca.packages.errors.types import ExceptionWithCodeType
 
 
 @pytest.fixture

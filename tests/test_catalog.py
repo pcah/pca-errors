@@ -1,6 +1,6 @@
 import typing as t
 
-from pca.errors import (
+from pca.packages.errors import (
     ErrorCatalog,
     ExceptionWithCode,
     error_builder,

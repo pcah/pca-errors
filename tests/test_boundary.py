@@ -5,7 +5,7 @@ from collections import namedtuple
 import mock
 import pytest
 
-from pca.errors import ErrorBoundary
+from pca.packages.errors import ErrorBoundary
 
 
 PY36 = (3, 6) <= sys.version_info < (3, 7)

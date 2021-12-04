@@ -1,6 +1,6 @@
 import typing as t
 
-from pca.errors.types import (
+from pca.packages.errors.types import (
     ExceptionTypeOrTypes,
     ExceptionWithCode,
     ExceptionWithCodeType,
