@@ -97,6 +97,7 @@ class ErrorMeta(type):
             "kwargs": None,
             "__init__": _init,
             "__getattr__": _getattr,
+            "__str__": _repr,
             "__repr__": _repr,
             "to_dict": _to_dict,
             "clone": _clone,
