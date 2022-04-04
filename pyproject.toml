@@ -36,19 +36,14 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
-
-dataclasses = {version = "^0.8", python = "3.6"}
+python = "^3.7"
 
 [tool.poetry.dev-dependencies]
 
 black = {version = "^20.8b1", markers = "platform_python_implementation!='PyPy'"}
 coverage = "^5.3"
 flake8 = "^3.8.4"
-ipython = [
-    {version = "^7.32.0", python = "^3.7"},
-    {version = "~7.16.3", python = "3.6"},
-]
+ipython = "^7.32.0"
 isort = "^5.6.4"
 mock = "^4.0.2"
 pdbpp = "^0.10.2"

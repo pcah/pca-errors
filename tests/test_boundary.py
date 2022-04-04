@@ -1,5 +1,3 @@
-import sys
-
 from collections import namedtuple
 
 import mock
@@ -7,8 +5,6 @@ import pytest
 
 from pca.packages.errors import ErrorBoundary
 
-
-PY36 = (3, 6) <= sys.version_info < (3, 7)
 
 Callbacks = namedtuple(
     "Callbacks",
@@ -162,10 +158,6 @@ class TestCallbackErrors:
     Tests checking what happens when a callback throws an error.
     """
 
-    @pytest.mark.skipif(
-        PY36,
-        reason="strange behavior of representing Exception.args on CPython 3.6.15; waiting for obsoletion for Py36",
-    )
     def test_log_inner_error(self, caplog) -> None:
         main_exception = AnException("main_exception")
         callback_exception = AnotherException("callback_exception")
