@@ -6,7 +6,7 @@
 
 ### 0.2.0
 
-- [ ] Introducing nested catalogs
+- [x] Introducing nested catalogs
 - [ ] Beta release
 
 ### 1.0.0

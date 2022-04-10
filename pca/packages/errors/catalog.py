@@ -10,12 +10,16 @@ from .types import (
 
 class ErrorCatalogMeta(type):
 
-    _registry: t.Dict[str, ExceptionWithCodeType]
+    __error_registry: t.Dict[str, ExceptionWithCodeType]
+    __subcatalog_registry: t.Dict[str, "ErrorCatalogMeta"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._registry = OrderedDict(
+        self.__error_registry = OrderedDict(
             (v.code, v) for _, v in self.__dict__.items() if is_error_class(v)
+        )
+        self.__subcatalog_registry = OrderedDict(
+            (v.__name__, v) for _, v in self.__dict__.items() if isinstance(v, ErrorCatalogMeta)
         )
 
     def __str__(self) -> str:
@@ -26,42 +30,69 @@ class ErrorCatalogMeta(type):
 
     def __iter__(self) -> t.Iterator[ExceptionWithCodeType]:
         """Iterate over registered errors."""
-        yield from self._registry.values()
+        yield from self.__error_registry.values()
+        yield from (e for c in self.__subcatalog_registry.values() for e in c)
 
     def __len__(self) -> int:
-        return len(self._registry)
+        return len(self.all())
 
     def __contains__(self, item: ExceptionWithCodeType) -> bool:
-        return item in self._registry.values()
+        return item in self.all()
 
     def add_instance(self, error_class: ExceptionWithCodeType) -> None:
         """Registers an ExceptionWithCode subtype as an element of the ErrorCatalog."""
-        self._registry[error_class.code] = error_class
+        self.__error_registry[error_class.code] = error_class
         setattr(self, error_class.code, error_class)
         error_class.catalog = t.cast("ErrorCatalog", self)
 
     def all(self) -> t.Tuple[ExceptionWithCodeType, ...]:
-        return tuple(self._registry.values())
+        return tuple(self.__iter__())
+
+    def subcatalogs(self) -> t.Tuple["ErrorCatalogMeta", ...]:
+        return tuple(self.__subcatalog_registry.values())
 
 
 class ErrorCatalog(metaclass=ErrorCatalogMeta):
     """
     A class that can serve as a collection of named BaseErrors, gathered with a common reason.
     Instances of BaseErrors are meant to be declared as fields. Names of their fields may be
-    used as default value of `code` for each instance. The catalog may set default value of
-    `area` for all of them.
+    used as default value of `code` for each instance.
+
+    >>> class SomeCatalog(ErrorCatalog):
+    ...     SomeError = error_builder()
+    ...     AnotherError = error_builder("ExpliciteNameForAnotherError")
+
 
     Developers are encouraged to gather errors of their business logic into such error classes.
+    Such catalogs can be nested to structurize their relation further, in a form of a tree.
+
+    >>> class ExternalCatalog(ErrorCatalog):
+    ...     ExternalError = error_builder()
+
+    >>> class CompositeCatalog(ErrorCatalog):
+    ...     OwnError = error_builder()
+    ...     ExternalCatalogIncluded = ExternalCatalog
+    ...
+    ...     class NestedCatalog(ErrorCatalog):
+    ...         NestedError = error_builder()
+
+    >>> assert CompositeCatalog.all() == (
+    ...     CompositeCatalog.OwnError,
+    ...     ExternalCatalog.ExternalError,
+    ...     CompositeCatalog.NestedCatalog.NestedError
+    ... )
+
+
     If you want to reuse an error already attached to a catalog, use error's `clone` method
     like this:
 
     >>> class OldCatalog(ErrorCatalog):
-    ...     ERROR = ExceptionWithCode()
+    ...     OldError = error_builder()
 
     >>> class NewCatalog(ErrorCatalog):
-    ...     AN_EXISTING_ERROR = OldCatalog.ERROR.clone()
+    ...     AnExistingError = OldCatalog.OldError.clone()
 
-    >>> assert OldCatalog.ERROR == NewCatalog.AN_EXISTING_ERROR
-    >>> assert OldCatalog.ERROR.catalog == OldCatalog
-    >>> assert NewCatalog.AN_EXISTING_ERROR.catalog == NewCatalog
+    >>> assert OldCatalog.OldCatalog is not NewCatalog.AnExistingError
+    >>> assert OldCatalog.OldCatalog.catalog == OldCatalog
+    >>> assert NewCatalog.AnExistingError.catalog == NewCatalog
     """

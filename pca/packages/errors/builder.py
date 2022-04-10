@@ -70,10 +70,9 @@ class ErrorMeta(type):
     * human-readable description of the error should be computed as late as possible (not earlier
       than on the presentation layer, where l10n & i18n process is made)
     * error instance should have a unique code
-    * error instance can have an area which describes its general topic
     * error instances can be gathered into catalogs which describe their common reason or a place
       to be raised
-    * an error instance is a value object, defined by their code and area
+    * an error instance is a value object, defined by their code
     * an error can have params, which can be used to pass some data specific for the place
       the instance is raised, but isn't considered a part of the value for checking instance
       equality
