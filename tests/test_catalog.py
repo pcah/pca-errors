@@ -29,12 +29,12 @@ class TestErrorCatalog:
         assert list(ExampleCatalog) == [ExampleCatalog.Foo, ExampleCatalog.Bar]
 
     def test_all(self):
-        assert ExampleCatalog.all() == (ExampleCatalog.Foo, ExampleCatalog.Bar)
+        assert ExampleCatalog.all == (ExampleCatalog.Foo, ExampleCatalog.Bar)
 
     def test_all_in_except_clause(self):
         try:
             raise ExampleCatalog.Foo()
-        except ExampleCatalog.all() as e:
+        except ExampleCatalog.all as e:
             assert repr(e) == "Foo()"
 
     def test_tuple_in_except_clause(self):

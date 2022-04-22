@@ -18,10 +18,16 @@ class CompositeCatalog(ErrorCatalog):
     class NestedCatalog(ErrorCatalog):
         NestedError: t.Type[ExceptionWithCode] = error_builder()
 
+        class DoublyNestedCatalog(ErrorCatalog):
+            DoublyNested: t.Type[ExceptionWithCode] = error_builder()
 
-def test_subcatalogs() -> None:
-    assert ExternalCatalog.subcatalogs() == ()
-    assert CompositeCatalog.subcatalogs() == (ExternalCatalog, CompositeCatalog.NestedCatalog)
+
+def test_nested_catalogs() -> None:
+    assert ExternalCatalog._nested_catalogs == {}
+    assert CompositeCatalog._nested_catalogs == {
+        "ExternalCatalog": ExternalCatalog,
+        "NestedCatalog": CompositeCatalog.NestedCatalog,
+    }
 
 
 def test_repr() -> None:
@@ -32,16 +38,17 @@ def test_repr() -> None:
 
 
 def test_all() -> None:
-    assert CompositeCatalog.all() == (
+    assert CompositeCatalog.all == (
         CompositeCatalog.OwnError,
         ExternalCatalog.ExternalError,
         CompositeCatalog.NestedCatalog.NestedError,
+        CompositeCatalog.NestedCatalog.DoublyNestedCatalog.DoublyNested,
     )
 
 
 def test_len() -> None:
-    assert len(CompositeCatalog.NestedCatalog) == 1
-    assert len(CompositeCatalog) == 3
+    assert len(CompositeCatalog.NestedCatalog) == 2
+    assert len(CompositeCatalog) == 4
 
 
 def test_contains() -> None:

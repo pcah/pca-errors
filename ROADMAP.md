@@ -6,9 +6,13 @@
 
 ### 0.2.0
 
-- [x] Introducing nested catalogs
+- [x] Introducing nested ErrorCatalogs
+- [x] Support for ErrorCatalog inheritance
 - [ ] Beta release
 
 ### 1.0.0
 
 - [ ] Stable release
+- [ ] Documentation
+- [ ] Quickstart guide
+- [ ] Code cleaning
