@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pca-errors"
-version = "0.2.0-alpha.0"
+version = "0.2.0"
 description = "Declarative, parametrizable & L10n-independent errors for python-clean-architecture."
 authors = [
     "lhaze <github@lhaze.name>",
